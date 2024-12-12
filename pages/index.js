@@ -1,51 +1,43 @@
 import MeetupList from "../components/meetups/MeetupList";
 
-export const DUMMY_MEETUPS = [
-    {
-        id: 'm1',
-        title: 'A First Meetup',
-        image: 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Stadtbild_M%C3%BCnchen.jpg',
-        address: 'Some address 5, 12345 Some City',
-        description: "This is a first meetup!"
-    },
-    {
-        id: 'm2',
-        title: 'A Second Meetup',
-        image: 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Stadtbild_M%C3%BCnchen.jpg',
-        address: 'Some address 10, 12345 Some City',
-        description: "This is a second meetup!"
-    },
-    {
-        id: 'm3',
-        title: 'A Third Meetup',
-        image: 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Stadtbild_M%C3%BCnchen.jpg',
-        address: 'Some address 15, 12345 Some City',
-        description: "This is a third meetup!"
-    }
-];
-
 function HomePage(props) {
     return <MeetupList meetups={props.meetups} />;
 }
 
-// export async function getServerSideProps(context) {
-//     const req = context.req;
-//     const res = context.res;
-    
-//     return {
-//         props: {
-//             meetups: DUMMY_MEETUPS,
-//         },
-//     };
-// }
-
 export async function getStaticProps() {
-    return {
-        props: {
-            meetups: DUMMY_MEETUPS,
-        },
-        revalidate: 1
-    };
+    try {
+        const response = await fetch(
+            'http://localhost:3000/api/new-meetup',
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const data = await response.json();
+
+        return {
+            props: {
+                meetups: data.meetups.map((meetup) => ({
+                    id: meetup._id.toString(),
+                    title: meetup.title,
+                    image: meetup.image,
+                    address: meetup.address,
+                    description: meetup.description,
+                })),
+            },
+            revalidate: 1,
+        };
+    } catch (error) {
+        console.error('Error fetching meetups:', error);
+        return {
+            props: {
+                meetups: [],
+            },
+        };
+    }
 }
 
 export default HomePage;
