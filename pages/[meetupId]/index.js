@@ -1,14 +1,44 @@
-import { Fragment } from "react";
 import MeetupDetail from "../../components/meetups/MeetupDetail";
+import { DUMMY_MEETUPS } from "../index";
+function MeetupDetails(props) {
+    const { title, image, address, description } = props.meetupData;
 
-function MeetupDetails(){
     return (
-    <MeetupDetail
-        title= 'A First Meetup'
-        image= 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Stadtbild_M%C3%BCnchen.jpg'
-        address= 'Some address 5, 12345 Some City'
-        description= "This is a first meetup!"
-    />
-    )
+        <MeetupDetail
+            title={title}
+            image={image}
+            address={address}
+            description={description}
+        />
+    );
 }
+
+export async function getStaticPaths() {
+    return {
+        fallback: true,
+        paths: [
+            { params: { meetupId: 'm1' } },
+            { params: { meetupId: 'm2' } },
+            { params: { meetupId: 'm3' } }
+        ]
+    };
+}
+
+export async function getStaticProps(context) {
+    const meetupId = context.params.meetupId;
+
+    const selectedMeetup = DUMMY_MEETUPS.find((meetup) => meetup.id === meetupId);
+
+    if (!selectedMeetup) {
+        return { notFound: true };
+    }
+
+    return {
+        props: {
+            meetupData: selectedMeetup
+        },
+        revalidate: 1
+    };
+}
+
 export default MeetupDetails;
